@@ -5,13 +5,15 @@ from flask_cors import CORS
 from langchain.chains import LLMChain
 from langchain_openai import ChatOpenAI
 from langchain_community.document_loaders import PyPDFLoader
+from langchain_community.document_loaders import UnstructuredWordDocumentLoader
 from langchain_core.prompts import PromptTemplate
+# from langchain_ollama import ChatOllama
 
 app = Flask(__name__)
 CORS(app)
 
-with open("openai.txt", "r") as f:
-    os.environ['OPENAI_API_KEY'] = f.read().strip()
+with open("openai.txt", "r") as conf:
+    os.environ['OPENAI_API_KEY'] = conf.read().strip()
 
 EXTRACT_PROMPT_TEMPLATE = """
 Extract the key information from the following PDF content:
@@ -41,6 +43,7 @@ def main():
 @app.route('/api/v1/analyze', methods=['GET', 'POST'])
 def analyze_file():
     file_name = request.form['filename']
+    file_type = request.form['filetype']
     prompt = request.form['prompt']
 
     if not file_name:
@@ -51,23 +54,35 @@ def analyze_file():
 
     try:
         f = request.files['file']
-        f.save(os.path.join(data_path + file_name + ".pdf"))
+        f.save(os.path.join(data_path + file_name + "." + file_type))
     except FileNotFoundError:
         os.makedirs(os.path.join(data_path))
         f = request.files['file']
-        f.save(os.path.join(data_path + file_name + ".pdf"))
+        f.save(os.path.join(data_path + file_name + "." + file_type))
 
-    file_path = os.path.join(data_path + file_name + ".pdf")
+    file_path = os.path.join(data_path + file_name + "." + file_type)
+
     if not os.path.exists(file_path):
         return jsonify({"code":"404", "message": "Error while uploading file. File might be corrupted or your connection was abnormally aborted."}), 500
 
-    loader = PyPDFLoader(file_path)
+    if file_type == "pdf":
+        loader = PyPDFLoader(file_path)
+    else:
+        loader = UnstructuredWordDocumentLoader(file_path)
+
     document = loader.load()
     content = [doc.page_content for doc in document]
 
     llm = ChatOpenAI(model_name=MODEL, streaming=False, temperature=0.7)
+
+    # # For offline testing with fucking Internet connection
+    # llm = ChatOllama(
+    #     model="llama3.2",
+    #     temperature=0.7
+    # )
+
     extract_chain = LLMChain(llm=llm, prompt=EXTRACT_PROMPT)
-    extracted_info = extract_chain.run(pdf_content=str(content), instruction=prompt)
+    extracted_info = extract_chain.run({"pdf_content": str(content), "instruction": prompt})
 
     return jsonify({"code":"200", "message": extracted_info}), 200
 
