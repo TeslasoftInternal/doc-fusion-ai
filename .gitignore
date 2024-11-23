@@ -1,0 +1,10 @@
+/.venv
+/data
+*.pdf
+/data/test
+/.idea
+/build
+/templates
+*.pyc
+*.txt
+openai.txt
