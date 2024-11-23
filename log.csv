@@ -63,3 +63,31 @@ timestamp,type,data
 • VizDoom: https://vizdoom.cs.put.edu.pl/  
 Как вы будете оценивать свои результаты (метрики, анализ и т.д.)? Как вы определяете ""хорошие"" и ""неудачные"" результаты?  
 Мы будем измерять частоту кадров, использование CPU/GPU и время обучения."
+2024-11-23 23:03:08.923473,answer,"Subject: Proposal for Collaboration on Diffusion Model Optimization Project
+
+Dear [Recipient's Name],
+
+I hope this message finds you well. My name is [Your Name], and I am reaching out to introduce an exciting project that we believe aligns with the innovative work being done at [Startup Name].
+
+Our team is currently engaged in a project focused on optimizing diffusion models and developing a new model that can efficiently operate in a standard home environment. The challenge lies in the computational demands of diffusion models, which we aim to address by reducing training and inference costs.
+
+The primary goal of our project is to modify the existing model, as detailed in a recent publication, to use fewer resources while enhancing processing speed. We are utilizing the VizDoom engine in conjunction with Reinforcement Learning technology to achieve this. Our approach involves replacing the current model with a diffusion model described in the paper accessible here: [https://arxiv.org/pdf/2306.09305].
+
+To support this endeavor, we plan to replicate the model described in the publication and subsequently identify suitable datasets for training. Our evaluation metrics include measuring framerate, CPU/GPU utilization, and training time to define successful outcomes.
+
+We have been inspired by existing solutions and are eager to extend and improve upon them. Some of the literature informing our work includes:
+- ""DIFFUSION MODELS ARE REAL-TIME GAME ENGINES"": [https://arxiv.org/pdf/2408.14837]
+- VizDoom documentation: [https://vizdoom.cs.put.edu.pl/]
+
+Given [Startup Name]'s expertise and innovative approach, we believe there is a significant opportunity for collaboration. We would be interested in exploring potential synergies and discussing how we can work together to advance this project further.
+
+Please let me know if you are available for a meeting or a call to discuss this project in more detail. I am looking forward to the possibility of collaborating and achieving groundbreaking results together.
+
+Thank you for considering this opportunity. I look forward to your response.
+
+Warm regards,
+
+[Your Full Name]  
+[Your Position]  
+[Your Contact Information]  
+[Your Company/Organization Name]  "
