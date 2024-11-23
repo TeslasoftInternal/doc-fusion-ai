@@ -7,10 +7,11 @@ from langchain_openai import ChatOpenAI
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_community.document_loaders import UnstructuredWordDocumentLoader
 from langchain_core.prompts import PromptTemplate
-# from langchain_ollama import ChatOllama
+import pandas as pd
 
 app = Flask(__name__)
 CORS(app)
+
 
 with open("openai.txt", "r") as conf:
     os.environ['OPENAI_API_KEY'] = conf.read().strip()
@@ -32,6 +33,7 @@ EXTRACT_PROMPT = PromptTemplate(
 )
 
 MODEL = "gpt-4o"
+IDB = "log.csv"
 
 data_path = os.path.join(os.path.dirname(__file__) + '/data/')
 
@@ -40,18 +42,25 @@ def main():
     return jsonify({"code": "200", "message": "DocFusion AI is working. Use /api/v1/analyze endpoint to work with your documents."}), 200
 
 
-@app.route('/api/v1/analyze', methods=['GET', 'POST'])
-def analyze_file():
-    file_name = request.form['filename']
-    file_type = request.form['filetype']
-    prompt = request.form['prompt']
+def chain_extract(model, content, instruction):
+    llm = ChatOpenAI(model_name=model, streaming=False, temperature=0.7)
+    extract_chain = LLMChain(llm=llm, prompt=EXTRACT_PROMPT)
+    extracted_info = extract_chain.run({"pdf_content": content, "instruction": instruction})
+    log_extracted_info = {
+        'timestamp': pd.Timestamp.now(),
+        'type': 'answer',
+        'data': extracted_info
+    }
 
-    if not file_name:
-        return jsonify({"code":"400", "message": "Please provide a file name."}), 400
+    data_frame_extracted_info = pd.DataFrame([log_extracted_info])
 
-    if not prompt:
-        return jsonify({"code":"400", "message": "Please provide a prompt."}), 400
+    if os.path.exists(IDB):
+        data_frame_extracted_info.to_csv(IDB, mode='a', header=False, index=False)
 
+    return extracted_info
+
+
+def process_file(file_name, file_type):
     try:
         f = request.files['file']
         f.save(os.path.join(data_path + file_name + "." + file_type))
@@ -72,19 +81,25 @@ def analyze_file():
 
     document = loader.load()
     content = [doc.page_content for doc in document]
+    return content
 
-    llm = ChatOpenAI(model_name=MODEL, streaming=False, temperature=0.7)
 
-    # # For offline testing with fucking Internet connection
-    # llm = ChatOllama(
-    #     model="llama3.2",
-    #     temperature=0.7
-    # )
+@app.route('/api/v1/analyze', methods=['GET', 'POST'])
+def analyze_file():
+    file_name = request.form['filename']
+    file_type = request.form['filetype']
+    prompt = request.form['prompt']
 
-    extract_chain = LLMChain(llm=llm, prompt=EXTRACT_PROMPT)
-    extracted_info = extract_chain.run({"pdf_content": str(content), "instruction": prompt})
+    if not file_name:
+        return jsonify({"code":"400", "message": "Please provide a file name."}), 400
 
-    return jsonify({"code":"200", "message": extracted_info}), 200
+    if not prompt:
+        return jsonify({"code":"400", "message": "Please provide a prompt."}), 400
+
+    file = process_file(file_name, file_type)
+    output =  chain_extract(MODEL, file, prompt)
+
+    return jsonify({"code": "200", "message": output}), 200
 
 
 if __name__ == '__main__':
