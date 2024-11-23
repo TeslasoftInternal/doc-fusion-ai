@@ -32,6 +32,24 @@ EXTRACT_PROMPT = PromptTemplate(
     template=EXTRACT_PROMPT_TEMPLATE
 )
 
+TRANSLATE_PROMPT_TEMPLATE = """
+Translate the following information to the language specified:
+
+PDF Content:
+{pdf_content}
+
+Translate to:
+
+{language}
+
+Write only translated text and nothing else.
+"""
+
+TRANSLATE_PROMPT = PromptTemplate(
+    input_variables=["pdf_content", "language"],
+    template=TRANSLATE_PROMPT_TEMPLATE
+)
+
 MODEL = "gpt-4o"
 IDB = "log.csv"
 
@@ -46,6 +64,24 @@ def chain_extract(model, content, instruction):
     llm = ChatOpenAI(model_name=model, streaming=False, temperature=0.7)
     extract_chain = LLMChain(llm=llm, prompt=EXTRACT_PROMPT)
     extracted_info = extract_chain.run({"pdf_content": content, "instruction": instruction})
+    log_extracted_info = {
+        'timestamp': pd.Timestamp.now(),
+        'type': 'answer',
+        'data': extracted_info
+    }
+
+    data_frame_extracted_info = pd.DataFrame([log_extracted_info])
+
+    if os.path.exists(IDB):
+        data_frame_extracted_info.to_csv(IDB, mode='a', header=False, index=False)
+
+    return extracted_info
+
+
+def chain_translate(model, content, language):
+    llm = ChatOpenAI(model_name=model, streaming=False, temperature=0.7)
+    extract_chain = LLMChain(llm=llm, prompt=TRANSLATE_PROMPT)
+    extracted_info = extract_chain.run({"pdf_content": content, "language": language})
     log_extracted_info = {
         'timestamp': pd.Timestamp.now(),
         'type': 'answer',
@@ -98,6 +134,24 @@ def analyze_file():
 
     file = process_file(file_name, file_type)
     output =  chain_extract(MODEL, file, prompt)
+
+    return jsonify({"code": "200", "message": output}), 200
+
+
+@app.route('/api/v1/translate', methods=['GET', 'POST'])
+def translate_file():
+    file_name = request.form['filename']
+    file_type = request.form['filetype']
+    lang = request.form['language']
+
+    if not file_name:
+        return jsonify({"code":"400", "message": "Please provide a file name."}), 400
+
+    if not lang:
+        return jsonify({"code":"400", "message": "Please provide a language."}), 400
+
+    file = process_file(file_name, file_type)
+    output = chain_translate(MODEL, file, lang)
 
     return jsonify({"code": "200", "message": output}), 200
 

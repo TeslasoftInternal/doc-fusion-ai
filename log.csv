@@ -3,3 +3,63 @@ timestamp,type,data
 2024-11-23 18:44:31.372989,answer,"The whitepaper outlines a project focused on optimizing and designing a new diffusion model that can be run in a typical home environment. The motivation is to address the computationally intensive nature of diffusion models by reducing training and inference costs. The project aims to modify an existing model to use fewer resources and operate more efficiently. Data for the project will be based on replicating a Reinforcement Learning (RL) model described in a specific article, with the goal of finding suitable datasets. The team intends to use the VizDoom engine and RL technology, aiming to replace an existing model with a diffusion model detailed in an academic paper. Relevant literature includes articles on diffusion models and the VizDoom platform. The project's success will be evaluated by measuring metrics such as framerate, CPU/GPU usage, and training time."
 2024-11-23 19:15:30.404860,answer,"The whitepaper outlines a project focused on optimizing diffusion models to make them feasible for execution in typical domestic environments. The key issue addressed is the high computational demand of diffusion models, aiming to reduce training and inference costs. The project goals involve modifying an existing model to use fewer resources and run faster. The team plans to replicate a Reinforcement Learning (RL) model described in an article and find suitable data for a dataset. They will use the VizDoom engine and RL technology to implement a diffusion model based on the article: https://arxiv.org/pdf/2306.09305. They have identified relevant literature, including articles on diffusion models and VizDoom. The success of the project will be evaluated by measuring framerate, CPU/GPU utilization, and training time."
 2024-11-23 19:16:08.876260,answer,"The whitepaper discusses a project focused on optimizing a diffusion model to make it feasible for use in a typical home environment. The problem addressed is the high computational demand of diffusion models, and the goal is to reduce training and inference costs. The project aims to modify an existing model to consume fewer resources and operate faster. It involves using VizDoom and Reinforcement Learning technologies to replace the current model with a diffusion model as described in the paper linked (https://arxiv.org/pdf/2306.09305). The team plans to replicate the model mentioned in an article to identify suitable data for their dataset. They will evaluate their work by measuring framerate, CPU/GPU usage, and training time, defining results as successful or unsuccessful based on these metrics. Key literature includes research on diffusion models as real-time game engines and resources on VizDoom."
+2024-11-23 20:28:18.085474,answer,"The whitepaper discusses a project focused on optimizing a diffusion model to make it feasible to run in a typical home environment. The project is motivated by the high computational demands of diffusion models, with a goal to reduce training and inference costs. The project aims to modify an existing model to use fewer resources and run faster. Data for the project will be based on replicating an RL model described in a referenced article. The project will utilize the VizDoom engine and Reinforcement Learning technology, aiming to replace the current model with a diffusion model as detailed in a specific article. Relevant literature includes articles on diffusion models and the VizDoom platform. Evaluation metrics will include framerate, CPU/GPU usage, and training time."
+2024-11-23 20:30:37.813137,answer,"The whitepaper discusses a project aimed at optimizing diffusion models to make them feasible for use in typical home environments. The primary goal is to reduce the computational costs associated with training and inference of these models. The project intends to modify an existing model to use fewer resources and operate more efficiently. Data for the project will be sourced by replicating the model described in a specific article, and the implementation will utilize the VizDoom engine and Reinforcement Learning technology. The team plans to replace the current model with a diffusion model outlined in a cited paper (https://arxiv.org/pdf/2306.09305). Key literature includes articles on diffusion models and VizDoom. Evaluation metrics will include framerate, CPU/GPU usage, and training time to define the success of the project."
+2024-11-23 20:32:41.267876,answer,"Here is the translated content in Russian:
+
+```
+       Белая книга
+
+Какую проблему вы собираетесь решить? Почему она интересна и актуальна?
+Наш проект решает проблему оптимизации диффузионной модели и разработки новой модели, которую можно запускать в обычных домашних условиях. Это нас заинтересовало, потому что диффузионные модели очень требовательны к вычислительным ресурсам, и наша цель — найти способ снизить затраты на обучение и применение модели.
+
+Каковы цели проекта?
+Цель состоит в том, чтобы модифицировать модель, описанную в статье, так, чтобы она использовала меньше ресурсов и работала быстрее.
+
+Какие данные вы будете использовать? Есть ли у вас существующие наборы данных или вы будете собирать данные самостоятельно?
+В статье подробно описана модель RL. Мы намерены воспроизвести эту модель и на этой основе найти подходящие данные для набора данных.
+
+Какой метод или алгоритм вы будете использовать? Вдохновлялись ли вы существующим решением, которое вы можете использовать? Как вы будете расширять и улучшать существующие решения?
+Для реализации мы будем использовать движок VizDoom и технологию Reinforcement Learning. Наша цель — заменить существующую модель диффузионной моделью, которая описана в статье: https://arxiv.org/pdf/2306.09305.
+
+Какую литературу вам необходимо изучить для ориентирования в решаемой проблеме? Если вы уже прочитали несколько статей, можете кратко их описать.
+• DIFFUSION MODELS ARE REAL-TIME GAME ENGINES: https://arxiv.org/pdf/2408.14837
+• Диффузионные модели: https://arxiv.org/pdf/2306.09305
+• VizDoom: https://vizdoom.cs.put.edu.pl/
+
+Как вы будете оценивать свои результаты (метрики, анализ и т.д.)? Как вы определяете ""хорошие"" и ""неудачные"" результаты?
+Мы будем измерять частоту кадров, использование CPU/GPU и время обучения.
+```"
+2024-11-23 20:36:16.482694,answer,"Белая книга
+
+Какую проблему вы собираетесь решать? Почему она интересна и актуальна? Наш проект решает проблему оптимизации диффузионной модели и разработки новой модели, которую можно запускать в обычной домашней среде. Это заинтересовало нас, потому что диффузионные модели очень ресурсоемкие, и наша цель — найти способ уменьшить затраты на обучение и применение модели.
+
+Каковы цели проекта? Цель заключается в том, чтобы адаптировать модель, описанную в статье, так, чтобы она использовала меньше ресурсов и работала быстрее.
+
+Какие данные вы будете использовать? У вас есть доступ к существующим наборам данных или вы будете собирать данные самостоятельно? В статье подробно описан RL-модель. Наше намерение — реплицировать эту модель и на основе этого найти подходящие данные для набора данных.
+
+Какой метод или алгоритм вы будете использовать? Вас вдохновило существующее решение, которое вы можете использовать? Как вы будете расширять и улучшать существующие решения? Для реализации мы используем движок VizDoom и технологию Reinforcement Learning. Наша цель — заменить существующую модель диффузионной моделью, которая описана в статье: https://arxiv.org/pdf/2306.09305.
+
+Какую литературу вам нужно изучить, чтобы ориентироваться в решаемой проблеме? Если вы уже прочитали несколько статей, можете кратко их описать.
+
+• DIFFUSION MODELS ARE REAL-TIME GAME ENGINES: https://arxiv.org/pdf/2408.14837
+• Диффузионные модели: https://arxiv.org/pdf/2306.09305
+• VizDoom: https://vizdoom.cs.put.edu.pl/
+
+Как вы будете оценивать ваши результаты (метрики, анализ и т. д.)? Как вы определяете ""хорошие"" и ""неудачные"" результаты? Мы будем измерять частоту кадров, использование CPU/GPU и время обучения."
+2024-11-23 20:39:07.140268,answer,"Вайтпейпер
+
+Какую проблему вы будете решать? Почему она интересна и актуальна?  
+Наш проект решает проблему оптимизации диффузионной модели и разработки новой модели, которую можно запускать в обычной домашней среде. Это нас заинтересовало, потому что диффузионные модели очень требовательны к вычислительным ресурсам, и наша цель — найти способ снизить затраты на обучение и инференс модели.  
+Каковы цели проекта?  
+Цель состоит в том, чтобы модифицировать модель, описанную в статье, таким образом, чтобы она использовала меньше ресурсов и работала быстрее.  
+Какие данные вы будете использовать? У вас есть доступ к существующим наборам данных, или вы будете собирать данные самостоятельно?  
+В статье подробно описана RL модель. Наше намерение — воспроизвести эту модель и на этой основе найти подходящие данные для набора данных.  
+Какой метод или алгоритм вы будете использовать? Вы вдохновились существующим решением, которое можете применить? Как вы будете расширять и улучшать существующие решения?  
+Для реализации мы используем движок VizDoom и технологию Reinforcement Learning. Наша цель — заменить существующую модель диффузионной моделью, которая описана в статье: https://arxiv.org/pdf/2306.09305.  
+Какую литературу необходимо изучить для понимания решаемой проблемы? Если вы уже прочитали несколько статей, можете кратко их описать.  
+• DIFFUSION MODELS ARE REAL-TIME GAME ENGINES: https://arxiv.org/pdf/2408.14837  
+• Диффузионные модели: https://arxiv.org/pdf/2306.09305  
+• VizDoom: https://vizdoom.cs.put.edu.pl/  
+Как вы будете оценивать свои результаты (метрики, анализ и т.д.)? Как вы определяете ""хорошие"" и ""неудачные"" результаты?  
+Мы будем измерять частоту кадров, использование CPU/GPU и время обучения."
