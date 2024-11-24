@@ -12,7 +12,6 @@ import pandas as pd
 app = Flask(__name__)
 CORS(app)
 
-
 with open("openai.txt", "r") as conf:
     os.environ['OPENAI_API_KEY'] = conf.read().strip()
 
@@ -79,6 +78,13 @@ PDF Content:
 {pdf_content}
 """
 
+VALIDATION_PROMPT_TEMPLATE = """
+Validate grammar, syntax and structure of the following Text and give correct text:
+
+Text:
+{text}
+"""
+
 EXTRACT_PROMPT = PromptTemplate(
     input_variables=["pdf_content", "instruction"],
     template=EXTRACT_PROMPT_TEMPLATE
@@ -114,20 +120,45 @@ HIGHLIGHT_PROMPT = PromptTemplate(
     template=HIGHLIGHT_PROMPT_TEMPLATE
 )
 
+VALIDATE_PROMPT = PromptTemplate(
+    input_variables=["text"],
+    template=VALIDATION_PROMPT_TEMPLATE
+)
+
 MODEL = "gpt-4o"
 IDB = "log.csv"
 
 data_path = os.path.join(os.path.dirname(__file__) + '/data/')
-
 @app.route('/', methods=['GET', 'POST'])
 def main():
     return jsonify({"code": "200", "message": "DocFusion AI is working. Use /api/v1/analyze endpoint to work with your documents."}), 200
 
+def chain_validate(model, text):
+    llm = ChatOpenAI(model_name=model, streaming=False, temperature=0.7)
+
+    validate_chain = LLMChain(llm=llm, prompt=VALIDATE_PROMPT)
+    validated_info = validate_chain.run({"text": text})
+
+    log_extracted_info = {
+        'timestamp': pd.Timestamp.now(),
+        'type': 'answer',
+        'data': validated_info
+    }
+
+    data_frame_extracted_info = pd.DataFrame([log_extracted_info])
+
+    if os.path.exists(IDB):
+        data_frame_extracted_info.to_csv(IDB, mode='a', header=False, index=False)
+
+    return validated_info
 
 def chain_extract(model, content, instruction):
     llm = ChatOpenAI(model_name=model, streaming=False, temperature=0.7)
     extract_chain = LLMChain(llm=llm, prompt=EXTRACT_PROMPT)
-    extracted_info = extract_chain.run({"pdf_content": content, "instruction": instruction})
+
+    extracted_info = chain_validate(MODEL, extract_chain.run({"pdf_content": content,
+                                                              "instruction": instruction}))
+
     log_extracted_info = {
         'timestamp': pd.Timestamp.now(),
         'type': 'answer',
@@ -185,12 +216,14 @@ def analyze_file():
 
 def chain_translate(model, content, language):
     llm = ChatOpenAI(model_name=model, streaming=False, temperature=0.7)
-    extract_chain = LLMChain(llm=llm, prompt=TRANSLATE_PROMPT)
-    extracted_info = extract_chain.run({"pdf_content": content, "language": language})
+    translate_chain = LLMChain(llm=llm, prompt=TRANSLATE_PROMPT)
+
+    translated_info = chain_validate(MODEL, translate_chain.run({"pdf_content": content, "language": language}))
+
     log_extracted_info = {
         'timestamp': pd.Timestamp.now(),
         'type': 'answer',
-        'data': extracted_info
+        'data': translated_info
     }
 
     data_frame_extracted_info = pd.DataFrame([log_extracted_info])
@@ -198,7 +231,7 @@ def chain_translate(model, content, language):
     if os.path.exists(IDB):
         data_frame_extracted_info.to_csv(IDB, mode='a', header=False, index=False)
 
-    return extracted_info
+    return translated_info
 
 @app.route('/api/v1/translate', methods=['GET', 'POST'])
 def translate_file():
@@ -217,15 +250,16 @@ def translate_file():
 
     return jsonify({"code": "200", "message": output}), 200
 
-
 def chain_summarize(model, content):
     llm = ChatOpenAI(model_name=model, streaming=False, temperature=0.7)
-    extract_chain = LLMChain(llm=llm, prompt=SUMMARIZE_PROMPT)
-    extracted_info = extract_chain.run({"pdf_content": content})
+    summarize_chain = LLMChain(llm=llm, prompt=SUMMARIZE_PROMPT)
+
+    summarized_info = chain_validate(MODEL, summarize_chain.run({"pdf_content": content}))
+
     log_extracted_info = {
         'timestamp': pd.Timestamp.now(),
         'type': 'answer',
-        'data': extracted_info
+        'data': summarized_info
     }
 
     data_frame_extracted_info = pd.DataFrame([log_extracted_info])
@@ -233,8 +267,7 @@ def chain_summarize(model, content):
     if os.path.exists(IDB):
         data_frame_extracted_info.to_csv(IDB, mode='a', header=False, index=False)
 
-    return extracted_info
-
+    return summarized_info
 
 @app.route('/api/v1/summarize', methods=['GET', 'POST'])
 def summarize_file():
@@ -249,15 +282,16 @@ def summarize_file():
 
     return jsonify({"code": "200", "message": output}), 200
 
-
 def chain_categorize(model, content):
     llm = ChatOpenAI(model_name=model, streaming=False, temperature=0.7)
-    extract_chain = LLMChain(llm=llm, prompt=CATEGORIZE_PROMPT)
-    extracted_info = extract_chain.run({"pdf_content": content})
+    categorize_chain = LLMChain(llm=llm, prompt=CATEGORIZE_PROMPT)
+
+    categorized_info = chain_validate(MODEL, categorize_chain.run({"pdf_content": content}))
+
     log_extracted_info = {
         'timestamp': pd.Timestamp.now(),
         'type': 'answer',
-        'data': extracted_info
+        'data': categorized_info
     }
 
     data_frame_extracted_info = pd.DataFrame([log_extracted_info])
@@ -265,8 +299,7 @@ def chain_categorize(model, content):
     if os.path.exists(IDB):
         data_frame_extracted_info.to_csv(IDB, mode='a', header=False, index=False)
 
-    return extracted_info
-
+    return categorized_info
 
 @app.route('/api/v1/categorize', methods=['GET', 'POST'])
 def categorize_file():
@@ -281,15 +314,16 @@ def categorize_file():
 
     return jsonify({"code": "200", "message": output}), 200
 
-
 def chain_optimize(model, content):
     llm = ChatOpenAI(model_name=model, streaming=False, temperature=0.7)
-    extract_chain = LLMChain(llm=llm, prompt=STRUCTURE_OPTIMISATION_PROMPT)
-    extracted_info = extract_chain.run({"pdf_content": content})
+    optimize_chain = LLMChain(llm=llm, prompt=STRUCTURE_OPTIMISATION_PROMPT)
+
+    optimized_info = chain_validate(MODEL, optimize_chain.run({"pdf_content": content}))
+
     log_extracted_info = {
         'timestamp': pd.Timestamp.now(),
         'type': 'answer',
-        'data': extracted_info
+        'data': optimized_info
     }
 
     data_frame_extracted_info = pd.DataFrame([log_extracted_info])
@@ -297,8 +331,7 @@ def chain_optimize(model, content):
     if os.path.exists(IDB):
         data_frame_extracted_info.to_csv(IDB, mode='a', header=False, index=False)
 
-    return extracted_info
-
+    return optimized_info
 
 @app.route('/api/v1/optimize', methods=['GET', 'POST'])
 def optimize_file_structure():
@@ -313,15 +346,17 @@ def optimize_file_structure():
 
     return jsonify({"code": "200", "message": output}), 200
 
-
 def chain_generate_email(model, content, user_query):
     llm = ChatOpenAI(model_name=model, streaming=False, temperature=0.7)
-    extract_chain = LLMChain(llm=llm, prompt=GENERATION_EMAIL_PROMPT)
-    extracted_info = extract_chain.run({"pdf_content": content, "user_query": user_query})
+    generate_chain = LLMChain(llm=llm, prompt=GENERATION_EMAIL_PROMPT)
+
+    generated_email = chain_validate(MODEL, generate_chain.run({"pdf_content": content,
+                                                              "user_query": user_query}))
+
     log_extracted_info = {
         'timestamp': pd.Timestamp.now(),
         'type': 'answer',
-        'data': extracted_info
+        'data': generated_email
     }
 
     data_frame_extracted_info = pd.DataFrame([log_extracted_info])
@@ -329,8 +364,7 @@ def chain_generate_email(model, content, user_query):
     if os.path.exists(IDB):
         data_frame_extracted_info.to_csv(IDB, mode='a', header=False, index=False)
 
-    return extracted_info
-
+    return generated_email
 
 @app.route('/api/v1/email', methods=['GET', 'POST'])
 def generate_email():
@@ -346,15 +380,16 @@ def generate_email():
 
     return jsonify({"code": "200", "message": output}), 200
 
-
 def chain_highlight(model, content):
     llm = ChatOpenAI(model_name=model, streaming=False, temperature=0.7)
-    extract_chain = LLMChain(llm=llm, prompt=HIGHLIGHT_PROMPT)
-    extracted_info = extract_chain.run({"pdf_content": content})
+    highlight_chain = LLMChain(llm=llm, prompt=HIGHLIGHT_PROMPT)
+
+    highlighted_info = chain_validate(MODEL, highlight_chain.run({"pdf_content": content}))
+
     log_extracted_info = {
         'timestamp': pd.Timestamp.now(),
         'type': 'answer',
-        'data': extracted_info
+        'data': highlighted_info
     }
 
     data_frame_extracted_info = pd.DataFrame([log_extracted_info])
@@ -362,8 +397,7 @@ def chain_highlight(model, content):
     if os.path.exists(IDB):
         data_frame_extracted_info.to_csv(IDB, mode='a', header=False, index=False)
 
-    return extracted_info
-
+    return highlighted_info
 
 @app.route('/api/v1/highlight', methods=['GET', 'POST'])
 def highlight_file():
@@ -377,7 +411,6 @@ def highlight_file():
     output = chain_highlight(MODEL, file)
 
     return jsonify({"code": "200", "message": output}), 200
-
 
 if __name__ == '__main__':
     app.run()
