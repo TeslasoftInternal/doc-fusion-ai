@@ -83,7 +83,7 @@ CATEGORIZE_PROMPT = PromptTemplate(
 
 STRUCTURE_OPTIMISATION_PROMPT = PromptTemplate(
     input_variables=["pdf_content"],
-    template=SUMMARIZE_PROMPT_TEMPLATE
+    template=STRUCTURE_OPTIMISATION_PROMPT_TEMPLATE
 )
 
 GENERATION_EMAIL_PROMPT = PromptTemplate(
