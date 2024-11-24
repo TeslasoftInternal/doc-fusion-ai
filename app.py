@@ -27,73 +27,9 @@ And provide the answer according to the following instruction:
 {instruction}
 """
 
-SUMMARIZE_PROMPT_TEMPLATE = """
-Summarize information from the following PDF content:
-
-PDF Content:
-{pdf_content}
-"""
-
-CATEGORIZATION_PROMPT_TEMPLATE = """
-Group information into categories from the following PDF content:
-
-PDF Content:
-{pdf_content}
-"""
-
-STRUCTURE_OPTIMISATION_PROMPT_TEMPLATE = """
-Correct grammar, spelling, and punctuation errors, improve structure, 
-and flag instances of passive voice, jargon, or repetitive phrases of text from following PDF content:
-
-PDF Content:
-{pdf_content}
-"""
-
-GENERATION_EMAIL_PROMPT_TEMPLATE = """
-According to the following PDF content and User query generate professional email:
-
-PDF Content:
-{pdf_content}
-
-User query:
-{user_query}
-"""
-
-HIGHLIGHT_PROMPT_TEMPLATE = """
-Highlight the most important sentences or paragraphs in the information from the following PDF content:
-
-PDF Content:
-{pdf_content}
-"""
-
 EXTRACT_PROMPT = PromptTemplate(
     input_variables=["pdf_content", "instruction"],
     template=EXTRACT_PROMPT_TEMPLATE
-)
-
-SUMMARIZE_PROMPT = PromptTemplate(
-    input_variables=["pdf_content"],
-    template=SUMMARIZE_PROMPT_TEMPLATE
-)
-
-CATEGORIZE_PROMPT = PromptTemplate(
-    input_variables=["pdf_content"],
-    template=CATEGORIZATION_PROMPT_TEMPLATE
-)
-
-STRUCTURE_OPTIMISATION_PROMPT = PromptTemplate(
-    input_variables=["pdf_content"],
-    template=STRUCTURE_OPTIMISATION_PROMPT_TEMPLATE
-)
-
-GENERATION_EMAIL_PROMPT = PromptTemplate(
-    input_variables=["pdf_content"],
-    template=GENERATION_EMAIL_PROMPT_TEMPLATE
-)
-
-HIGHLIGHT_PROMPT = PromptTemplate(
-    input_variables=["pdf_content"],
-    template=HIGHLIGHT_PROMPT_TEMPLATE
 )
 
 MODEL = "gpt-4o"
@@ -165,6 +101,25 @@ def analyze_file():
 
     return jsonify({"code": "200", "message": output}), 200
 
+
+@app.route('/api/v1/translate', methods=['GET', 'POST'])
+def translate_file():
+    file_name = request.form['filename']
+    file_type = request.form['filetype']
+    lang = request.form['language']
+
+    if not file_name:
+        return jsonify({"code":"400", "message": "Please provide a file name."}), 400
+
+    if not lang:
+        return jsonify({"code":"400", "message": "Please provide a language."}), 400
+
+    file = process_file(file_name, file_type)
+    output = chain_translate(MODEL, file, lang)
+
+    return jsonify({"code": "200", "message": output}), 200
+
+
 def chain_summarize(model, content):
     llm = ChatOpenAI(model_name=model, streaming=False, temperature=0.7)
     extract_chain = LLMChain(llm=llm, prompt=SUMMARIZE_PROMPT)
@@ -182,6 +137,7 @@ def chain_summarize(model, content):
 
     return extracted_info
 
+
 @app.route('/api/v1/summarize', methods=['GET', 'POST'])
 def summarize_file():
     file_name = request.form['filename']
@@ -194,6 +150,7 @@ def summarize_file():
     output =  chain_summarize(MODEL, file)
 
     return jsonify({"code": "200", "message": output}), 200
+
 
 def chain_categorize(model, content):
     llm = ChatOpenAI(model_name=model, streaming=False, temperature=0.7)
@@ -212,6 +169,7 @@ def chain_categorize(model, content):
 
     return extracted_info
 
+
 @app.route('/api/v1/categorize', methods=['GET', 'POST'])
 def categorize_file():
     file_name = request.form['filename']
@@ -224,6 +182,7 @@ def categorize_file():
     output =  chain_categorize(MODEL, file)
 
     return jsonify({"code": "200", "message": output}), 200
+
 
 def chain_optimize(model, content):
     llm = ChatOpenAI(model_name=model, streaming=False, temperature=0.7)
@@ -242,6 +201,7 @@ def chain_optimize(model, content):
 
     return extracted_info
 
+
 @app.route('/api/v1/optimize', methods=['GET', 'POST'])
 def optimize_file_structure():
     file_name = request.form['filename']
@@ -254,6 +214,7 @@ def optimize_file_structure():
     output =  chain_optimize(MODEL, file)
 
     return jsonify({"code": "200", "message": output}), 200
+
 
 def chain_generate_email(model, content, user_query):
     llm = ChatOpenAI(model_name=model, streaming=False, temperature=0.7)
@@ -272,6 +233,7 @@ def chain_generate_email(model, content, user_query):
 
     return extracted_info
 
+
 @app.route('/api/v1/email', methods=['GET', 'POST'])
 def generate_email():
     file_name = request.form['filename']
@@ -285,6 +247,7 @@ def generate_email():
     output =  chain_generate_email(MODEL, file, query)
 
     return jsonify({"code": "200", "message": output}), 200
+
 
 def chain_highlight(model, content):
     llm = ChatOpenAI(model_name=model, streaming=False, temperature=0.7)
@@ -303,6 +266,7 @@ def chain_highlight(model, content):
 
     return extracted_info
 
+
 @app.route('/api/v1/highlight', methods=['GET', 'POST'])
 def highlight_file():
     file_name = request.form['filename']
@@ -315,6 +279,7 @@ def highlight_file():
     output = chain_highlight(MODEL, file)
 
     return jsonify({"code": "200", "message": output}), 200
+
 
 if __name__ == '__main__':
     app.run()
