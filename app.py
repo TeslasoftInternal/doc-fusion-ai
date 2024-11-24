@@ -22,7 +22,6 @@ PDF Content:
 {pdf_content}
 
 And provide the answer according to the following instruction:
-
 {instruction}
 """
 
@@ -33,32 +32,44 @@ PDF Content:
 {pdf_content}
 
 Translate to:
-
 {language}
 
 Write only translated text and nothing else.
 """
 
 SUMMARIZE_PROMPT_TEMPLATE = """
-Summarize information from the following PDF content:
+Provide an answer according to following Instruction, 
+summarize information from the following PDF content:
 
 PDF Content:
 {pdf_content}
+
+Instruction:
+{instruction}
 """
 
 CATEGORIZATION_PROMPT_TEMPLATE = """
-Group information into categories from the following PDF content:
+Provide an answer according to following Instruction, 
+group information into categories from the following PDF content:
 
 PDF Content:
 {pdf_content}
+
+Instruction:
+{instruction}
 """
 
 STRUCTURE_OPTIMISATION_PROMPT_TEMPLATE = """
-Correct grammar, spelling, and punctuation errors, improve structure, 
-and flag instances of passive voice, jargon, or repetitive phrases of text from following PDF content:
+Provide an answer according to following Instruction, 
+correct grammar, spelling, and punctuation errors, improve structure, 
+and flag instances of passive voice, jargon, or repetitive 
+phrases of text from following PDF content:
 
 PDF Content:
 {pdf_content}
+
+Instruction:
+{instruction}
 """
 
 GENERATION_EMAIL_PROMPT_TEMPLATE = """
@@ -69,17 +80,27 @@ PDF Content:
 
 User query:
 {user_query}
+
+And provide the answer according to the following instruction:
+{instruction}
 """
 
 HIGHLIGHT_PROMPT_TEMPLATE = """
-Highlight the most important sentences or paragraphs in the information from the following PDF content:
+provide an answer according to following Instruction,
+highlight the most important sentences or paragraphs 
+in the information from the following PDF content:
 
 PDF Content:
 {pdf_content}
+
+Instruction:
+{instruction}
 """
 
 VALIDATION_PROMPT_TEMPLATE = """
-Validate grammar, syntax and structure of the following Text and give correct text:
+Examine the text for errors in grammar, syntax, and structure. 
+Return the revised text if changes are needed; if perfect, simply output the same text, and don`t write any
+messages:
 
 Text:
 {text}
@@ -96,27 +117,27 @@ TRANSLATE_PROMPT = PromptTemplate(
 )
 
 SUMMARIZE_PROMPT = PromptTemplate(
-    input_variables=["pdf_content"],
+    input_variables=["pdf_content", "instruction"],
     template=SUMMARIZE_PROMPT_TEMPLATE
 )
 
 CATEGORIZE_PROMPT = PromptTemplate(
-    input_variables=["pdf_content"],
+    input_variables=["pdf_content", "instruction"],
     template=CATEGORIZATION_PROMPT_TEMPLATE
 )
 
 STRUCTURE_OPTIMISATION_PROMPT = PromptTemplate(
-    input_variables=["pdf_content"],
+    input_variables=["pdf_content", "instruction"],
     template=STRUCTURE_OPTIMISATION_PROMPT_TEMPLATE
 )
 
 GENERATION_EMAIL_PROMPT = PromptTemplate(
-    input_variables=["pdf_content"],
+    input_variables=["pdf_content", "instruction"],
     template=GENERATION_EMAIL_PROMPT_TEMPLATE
 )
 
 HIGHLIGHT_PROMPT = PromptTemplate(
-    input_variables=["pdf_content"],
+    input_variables=["pdf_content", "instruction"],
     template=HIGHLIGHT_PROMPT_TEMPLATE
 )
 
@@ -196,7 +217,6 @@ def process_file(file_name, file_type):
     content = [doc.page_content for doc in document]
     return content
 
-
 @app.route('/api/v1/analyze', methods=['GET', 'POST'])
 def analyze_file():
     file_name = request.form['filename']
@@ -250,11 +270,12 @@ def translate_file():
 
     return jsonify({"code": "200", "message": output}), 200
 
-def chain_summarize(model, content):
+def chain_summarize(model, content, instruction):
     llm = ChatOpenAI(model_name=model, streaming=False, temperature=0.7)
     summarize_chain = LLMChain(llm=llm, prompt=SUMMARIZE_PROMPT)
 
-    summarized_info = chain_validate(MODEL, summarize_chain.run({"pdf_content": content}))
+    summarized_info = chain_validate(MODEL, summarize_chain.run({"pdf_content": content,
+                                                                 "instruction": instruction}))
 
     log_extracted_info = {
         'timestamp': pd.Timestamp.now(),
@@ -273,20 +294,22 @@ def chain_summarize(model, content):
 def summarize_file():
     file_name = request.form['filename']
     file_type = request.form['filetype']
+    instruction = request.form['query']
 
     if not file_name:
         return jsonify({"code":"400", "message": "Please provide a file name."}), 400
 
     file = process_file(file_name, file_type)
-    output =  chain_summarize(MODEL, file)
+    output =  chain_summarize(MODEL, file, instruction)
 
     return jsonify({"code": "200", "message": output}), 200
 
-def chain_categorize(model, content):
+def chain_categorize(model, content, instruction):
     llm = ChatOpenAI(model_name=model, streaming=False, temperature=0.7)
     categorize_chain = LLMChain(llm=llm, prompt=CATEGORIZE_PROMPT)
 
-    categorized_info = chain_validate(MODEL, categorize_chain.run({"pdf_content": content}))
+    categorized_info = chain_validate(MODEL, categorize_chain.run({"pdf_content": content,
+                                                                   "instruction": instruction}))
 
     log_extracted_info = {
         'timestamp': pd.Timestamp.now(),
@@ -305,20 +328,23 @@ def chain_categorize(model, content):
 def categorize_file():
     file_name = request.form['filename']
     file_type = request.form['filetype']
+    instruction = request.form['query']
 
     if not file_name:
         return jsonify({"code":"400", "message": "Please provide a file name."}), 400
 
     file = process_file(file_name, file_type)
-    output =  chain_categorize(MODEL, file)
+    output =  chain_categorize(MODEL, file, instruction)
+
 
     return jsonify({"code": "200", "message": output}), 200
 
-def chain_optimize(model, content):
+def chain_optimize(model, content, instruction):
     llm = ChatOpenAI(model_name=model, streaming=False, temperature=0.7)
     optimize_chain = LLMChain(llm=llm, prompt=STRUCTURE_OPTIMISATION_PROMPT)
 
-    optimized_info = chain_validate(MODEL, optimize_chain.run({"pdf_content": content}))
+    optimized_info = chain_validate(MODEL, optimize_chain.run({"pdf_content": content,
+                                                               "instruction": instruction}))
 
     log_extracted_info = {
         'timestamp': pd.Timestamp.now(),
@@ -337,12 +363,13 @@ def chain_optimize(model, content):
 def optimize_file_structure():
     file_name = request.form['filename']
     file_type = request.form['filetype']
+    instruction = request.form['query']
 
     if not file_name:
         return jsonify({"code":"400", "message": "Please provide a file name."}), 400
 
     file = process_file(file_name, file_type)
-    output =  chain_optimize(MODEL, file)
+    output =  chain_optimize(MODEL, file, instruction)
 
     return jsonify({"code": "200", "message": output}), 200
 
@@ -380,11 +407,12 @@ def generate_email():
 
     return jsonify({"code": "200", "message": output}), 200
 
-def chain_highlight(model, content):
+def chain_highlight(model, content, instruction):
     llm = ChatOpenAI(model_name=model, streaming=False, temperature=0.7)
     highlight_chain = LLMChain(llm=llm, prompt=HIGHLIGHT_PROMPT)
 
-    highlighted_info = chain_validate(MODEL, highlight_chain.run({"pdf_content": content}))
+    highlighted_info = chain_validate(MODEL, highlight_chain.run({"pdf_content": content,
+                                                                  "instruction": instruction}))
 
     log_extracted_info = {
         'timestamp': pd.Timestamp.now(),
@@ -403,12 +431,13 @@ def chain_highlight(model, content):
 def highlight_file():
     file_name = request.form['filename']
     file_type = request.form['filetype']
+    instruction = request.form['query']
 
     if not file_name:
         return jsonify({"code": "400", "message": "Please provide a file name."}), 400
 
     file = process_file(file_name, file_type)
-    output = chain_highlight(MODEL, file)
+    output = chain_highlight(MODEL, file, instruction)
 
     return jsonify({"code": "200", "message": output}), 200
 
