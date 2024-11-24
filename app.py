@@ -27,9 +27,91 @@ And provide the answer according to the following instruction:
 {instruction}
 """
 
+TRANSLATE_PROMPT_TEMPLATE = """
+Translate the following information to the language specified:
+
+PDF Content:
+{pdf_content}
+
+Translate to:
+
+{language}
+
+Write only translated text and nothing else.
+"""
+
+SUMMARIZE_PROMPT_TEMPLATE = """
+Summarize information from the following PDF content:
+
+PDF Content:
+{pdf_content}
+"""
+
+CATEGORIZATION_PROMPT_TEMPLATE = """
+Group information into categories from the following PDF content:
+
+PDF Content:
+{pdf_content}
+"""
+
+STRUCTURE_OPTIMISATION_PROMPT_TEMPLATE = """
+Correct grammar, spelling, and punctuation errors, improve structure, 
+and flag instances of passive voice, jargon, or repetitive phrases of text from following PDF content:
+
+PDF Content:
+{pdf_content}
+"""
+
+GENERATION_EMAIL_PROMPT_TEMPLATE = """
+According to the following PDF content and User query generate professional email:
+
+PDF Content:
+{pdf_content}
+
+User query:
+{user_query}
+"""
+
+HIGHLIGHT_PROMPT_TEMPLATE = """
+Highlight the most important sentences or paragraphs in the information from the following PDF content:
+
+PDF Content:
+{pdf_content}
+"""
+
 EXTRACT_PROMPT = PromptTemplate(
     input_variables=["pdf_content", "instruction"],
     template=EXTRACT_PROMPT_TEMPLATE
+)
+
+TRANSLATE_PROMPT = PromptTemplate(
+    input_variables=["pdf_content", "language"],
+    template=TRANSLATE_PROMPT_TEMPLATE
+)
+
+SUMMARIZE_PROMPT = PromptTemplate(
+    input_variables=["pdf_content"],
+    template=SUMMARIZE_PROMPT_TEMPLATE
+)
+
+CATEGORIZE_PROMPT = PromptTemplate(
+    input_variables=["pdf_content"],
+    template=CATEGORIZATION_PROMPT_TEMPLATE
+)
+
+STRUCTURE_OPTIMISATION_PROMPT = PromptTemplate(
+    input_variables=["pdf_content"],
+    template=STRUCTURE_OPTIMISATION_PROMPT_TEMPLATE
+)
+
+GENERATION_EMAIL_PROMPT = PromptTemplate(
+    input_variables=["pdf_content"],
+    template=GENERATION_EMAIL_PROMPT_TEMPLATE
+)
+
+HIGHLIGHT_PROMPT = PromptTemplate(
+    input_variables=["pdf_content"],
+    template=HIGHLIGHT_PROMPT_TEMPLATE
 )
 
 MODEL = "gpt-4o"
@@ -101,6 +183,22 @@ def analyze_file():
 
     return jsonify({"code": "200", "message": output}), 200
 
+def chain_translate(model, content, language):
+    llm = ChatOpenAI(model_name=model, streaming=False, temperature=0.7)
+    extract_chain = LLMChain(llm=llm, prompt=TRANSLATE_PROMPT)
+    extracted_info = extract_chain.run({"pdf_content": content, "language": language})
+    log_extracted_info = {
+        'timestamp': pd.Timestamp.now(),
+        'type': 'answer',
+        'data': extracted_info
+    }
+
+    data_frame_extracted_info = pd.DataFrame([log_extracted_info])
+
+    if os.path.exists(IDB):
+        data_frame_extracted_info.to_csv(IDB, mode='a', header=False, index=False)
+
+    return extracted_info
 
 @app.route('/api/v1/translate', methods=['GET', 'POST'])
 def translate_file():
