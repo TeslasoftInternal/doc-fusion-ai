@@ -1,0 +1,11 @@
+Flask~=3.1.0
+Flask-Cors~=5.0.0
+langchain~=0.3.7
+langchain-openai~=0.2.9
+langchain-community~=0.3.7
+langchain-core~=0.3.20
+pypdf
+unstructured
+python-docx
+pandas~=2.2.3
+numpy~=1.26.4
