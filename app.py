@@ -188,7 +188,7 @@ def process_file(file_name, file_type):
 def analyze_file():
     file_name = request.form['filename']
     file_type = request.form['filetype']
-    prompt = request.form['prompt']
+    prompt = request.form['query']
 
     if not file_name:
         return jsonify({"code":"400", "message": "Please provide a file name."}), 400
@@ -206,7 +206,7 @@ def analyze_file():
 def translate_file():
     file_name = request.form['filename']
     file_type = request.form['filetype']
-    lang = request.form['language']
+    lang = request.form['query']
 
     if not file_name:
         return jsonify({"code":"400", "message": "Please provide a file name."}), 400
